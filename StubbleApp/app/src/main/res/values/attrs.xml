@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <attr name="start_point_bg" format="reference"/>
+    <attr name="start_point_width" format="dimension"/>
+    <attr name="start_point_height" format="dimension"/>
+    <attr name="end_point_bg" format="reference"/>
+    <attr name="end_point_width" format="dimension"/>
+    <attr name="end_point_height" format="dimension"/>
+    <attr name="boder_color" format="color"/>
+    <attr name="boder_width" format="dimension"/>
+
+    <declare-styleable name="MyView">
+        <attr name="start_point_bg"/>
+        <attr name="start_point_width"/>
+        <attr name="start_point_height"/>
+        <attr name="end_point_bg"/>
+        <attr name="end_point_width"/>
+        <attr name="end_point_height"/>
+        <attr name="boder_color"/>
+        <attr name="boder_width"/>
+    </declare-styleable>
+</resources>
