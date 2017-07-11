@@ -10,18 +10,13 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
 import com.app.stubble.utils.ScreenUtil;
 
-import java.util.ArrayList;
-
 
 public class MyView extends View {
-
-    private static final String TAG = "MyView";
 
     //start_point
     private float sPWidth;
@@ -48,9 +43,8 @@ public class MyView extends View {
     private Paint mBorderPaint;
     private Paint mBitmapPaint;
 
-    private int mScreenW;
-    private int mScreenH;
-
+    private float xDownInScreen;
+    private float yDownInScreen;
     private float xInScreen;
     private float yInScreen;
     private float xStartPointOffset;
@@ -58,8 +52,22 @@ public class MyView extends View {
     private float xEndPointOffset;
     private float yEndPointOffset;
 
+    private int mScreenW;
+    private int mScreenH;
+
+    private Context mContext;
+    private OnScreenShotListener mOnScreenShotListener;
+
     private boolean isInSlide;
     private boolean isInRectangle;
+
+    public interface OnScreenShotListener {
+        void onScreenShot(float left, float top, float right, float bottom);
+    }
+
+    public void setOnScreenShotListener(OnScreenShotListener arg) {
+        this.mOnScreenShotListener = arg;
+    }
 
     public MyView(Context context) {
         this(context, null);
@@ -75,6 +83,8 @@ public class MyView extends View {
         TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.MyView, defStyleAttr, 0);
 
         try {
+            mContext = context;
+
             mScreenW = ScreenUtil.getScreenWidth(context);
             mScreenH = ScreenUtil.getScreenHeight(context);
 
@@ -135,15 +145,6 @@ public class MyView extends View {
         }
     }
 
-    public ArrayList<Float> getLocations() {
-        ArrayList<Float> floatArrayList = new ArrayList<>();
-        floatArrayList.add(sPRawX);
-        floatArrayList.add(sPRawY);
-        floatArrayList.add(ePRawX);
-        floatArrayList.add(ePRawY);
-        return floatArrayList;
-    }
-
     private void init() {
         post(new Runnable() {
             @Override
@@ -164,11 +165,12 @@ public class MyView extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-
-        Log.d(TAG, "onTouchEvent");
-
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                xDownInScreen = event.getRawX();
+                yDownInScreen = event.getRawY();
+                xInScreen = event.getRawX();
+                yInScreen = event.getRawY();
                 xStartPointOffset = event.getRawX() - sPRawX;
                 yStartPointOffset = event.getRawY() - sPRawY;
                 xEndPointOffset = event.getRawX() - ePRawX;
@@ -219,6 +221,15 @@ public class MyView extends View {
                 break;
 
             case MotionEvent.ACTION_UP:
+                if (xDownInScreen == xInScreen && yDownInScreen == yInScreen &&
+                        ((sPRawX - sPWidth / 2) < xDownInScreen) &&
+                        ((sPRawX + sPWidth / 2) > xDownInScreen) &&
+                        ((sPRawY - sPHeight / 2) < yDownInScreen) &&
+                        ((sPRawY + sPHeight / 2) > yDownInScreen)) {
+                    if (mOnScreenShotListener != null) {
+                        mOnScreenShotListener.onScreenShot(sPRawX, sPRawY, ePRawX, ePRawY);
+                    }
+                }
                 break;
 
         }

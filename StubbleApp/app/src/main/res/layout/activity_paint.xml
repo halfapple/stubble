@@ -9,11 +9,22 @@
     android:orientation="vertical"
     tools:context="com.app.stubble.PaintActivity">
 
-    <com.app.stubble.MyView android:layout_width="match_parent"
-                            app:start_point_height="15dp"
-                            app:start_point_width="15dp"
-                            app:end_point_height="30dp"
-                            app:end_point_width="30dp"
-                            android:layout_height="match_parent"/>
+    <FrameLayout android:layout_width="match_parent"
+                 android:layout_height="match_parent">
+
+        <TextView android:layout_width="match_parent"
+                  android:id="@+id/location_tv"
+                  android:layout_height="wrap_content"/>
+
+        <com.app.stubble.MyView android:layout_width="match_parent"
+                                android:id="@+id/rectangle_view_id"
+                                app:start_point_height="20dp"
+                                app:start_point_width="20dp"
+                                app:end_point_height="30dp"
+                                app:end_point_width="30dp"
+                                android:layout_height="match_parent"/>
+
+    </FrameLayout>
+
 
 </LinearLayout>
