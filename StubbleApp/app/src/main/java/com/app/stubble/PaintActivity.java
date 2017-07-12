@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 
@@ -49,9 +50,12 @@ public class PaintActivity extends BaseActivity {
     private int mResultCode;
     private Intent mResultData;
 
+    private int mLeft, mTop, mRight, mBottom;
     private MediaProjection mMediaProjection;
     private VirtualDisplay mVirtualDisplay;
     private MediaProjectionManager mMediaProjectionManager;
+
+    private static int statusBarHeight;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +74,11 @@ public class PaintActivity extends BaseActivity {
         mMyView.setOnScreenShotListener(new MyView.OnScreenShotListener() {
             @Override
             public void onScreenShot(float left, float top, float right, float bottom) {
+                mLeft = (int) left;
+                mTop = (int) top;
+                mRight = (int) right;
+                mBottom = (int) bottom;
+
                 sb.delete(0, sb.length());
                 sb.append("left=").append(left).append("\n")
                         .append("top=").append(top).append("\n")
@@ -78,6 +87,18 @@ public class PaintActivity extends BaseActivity {
                 mTv.setText(sb.toString());
 
                 startScreenCapture();
+            }
+        });
+
+        mMyView.setOnMovedListener(new MyView.OnMovedListener() {
+            @Override
+            public void onMovedListener(float left, float top, float right, float bottom) {
+                sb.delete(0, sb.length());
+                sb.append("left=").append(left).append("\n")
+                        .append("top=").append(top).append("\n")
+                        .append("right=").append(right).append("\n")
+                        .append("bottom=").append(bottom);
+                mTv.setText(sb.toString());
             }
         });
     }
@@ -129,39 +150,58 @@ public class PaintActivity extends BaseActivity {
             int height = image.getHeight();
             final Image.Plane[] planes = image.getPlanes();
             final ByteBuffer buffer = planes[0].getBuffer();
+
             int pixelStride = planes[0].getPixelStride();
             int rowStride = planes[0].getRowStride();
             int rowPadding = rowStride - pixelStride * width;
-            Bitmap bitmap = Bitmap.createBitmap(width+rowPadding/pixelStride, height, Bitmap.Config.ARGB_8888);
+            Bitmap bitmap = Bitmap.createBitmap(width + rowPadding/pixelStride, height, Bitmap.Config.ARGB_8888);
+
             bitmap.copyPixelsFromBuffer(buffer);
-            bitmap = Bitmap.createBitmap(bitmap, 0, 0,width, height);
+            bitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height);
             image.close();
 
-
-            if(bitmap != null) {
-                try{
-                    File fileImage = new File(nameImage);
-                    if(!fileImage.exists()){
-                        fileImage.createNewFile();
-                    }
-                    FileOutputStream out = new FileOutputStream(fileImage);
-                    if(out != null) {
-                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-                        out.flush();
-                        out.close();
-
-                        MediaScannerConnection.scanFile(getApplicationContext(),
-                                new String[] { fileImage.getPath() },
-                                new String[] { "image/jpeg" }, null);
-                    }
-                }catch(FileNotFoundException e) {
-                    e.printStackTrace();
-                }catch (IOException e){
-                    e.printStackTrace();
-                }
-            }
+            bitmap = splitBitmap(bitmap);
+            save_bitmap(bitmap);
         }
     };
+
+    private Bitmap splitBitmap(Bitmap bitmap) {
+        if(bitmap != null) {
+            return Bitmap.createBitmap(bitmap,
+                    mLeft, mTop - getStatusBarHeight() > 0 ? mTop - getStatusBarHeight() : getStatusBarHeight(),
+                    mRight - mLeft, mBottom - mTop);
+        }
+        return bitmap;
+    }
+
+    private void save_bitmap(Bitmap bitmap) {
+        if(bitmap != null) {
+            try {
+                File pa = new File(pathImage);
+                if (!pa.exists()) {
+                    pa.mkdirs();
+                }
+                File fileImage = new File(nameImage);
+                if(!fileImage.exists()) {
+                    fileImage.createNewFile();
+                }
+                FileOutputStream out = new FileOutputStream(fileImage);
+                if(out != null) {
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+                    out.flush();
+                    out.close();
+
+                    MediaScannerConnection.scanFile(getApplicationContext(),
+                            new String[] { fileImage.getPath() },
+                            new String[] { "image/jpeg" }, null);
+                }
+            }catch(FileNotFoundException e) {
+                e.printStackTrace();
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+    }
 
     private void startScreenCapture() {
         if (mMediaProjection != null) {
@@ -189,6 +229,21 @@ public class PaintActivity extends BaseActivity {
 
         Handler hl = new Handler();
         hl.postDelayed(rr, 1000);
+    }
+
+    private int getStatusBarHeight() {
+        if (statusBarHeight == 0) {
+            try {
+                Class<?> c = Class.forName("com.android.internal.R$dimen");
+                Object o = c.newInstance();
+                Field field = c.getField("status_bar_height");
+                int x = (Integer) field.get(o);
+                statusBarHeight = getResources().getDimensionPixelSize(x);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return statusBarHeight;
     }
 
     private void tearDownMediaProjection() {

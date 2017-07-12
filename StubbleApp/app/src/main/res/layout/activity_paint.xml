@@ -7,6 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:fitsSystemWindows="true"
     tools:context="com.app.stubble.PaintActivity">
 
     <FrameLayout android:layout_width="match_parent"
@@ -18,10 +19,10 @@
 
         <com.app.stubble.MyView android:layout_width="match_parent"
                                 android:id="@+id/rectangle_view_id"
-                                app:start_point_height="20dp"
-                                app:start_point_width="20dp"
-                                app:end_point_height="30dp"
-                                app:end_point_width="30dp"
+                                app:start_point_height="15dp"
+                                app:start_point_width="15dp"
+                                app:end_point_height="25dp"
+                                app:end_point_width="25dp"
                                 android:layout_height="match_parent"/>
 
     </FrameLayout>

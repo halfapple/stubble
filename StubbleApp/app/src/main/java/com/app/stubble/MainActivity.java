@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -14,7 +13,6 @@ import com.app.stubble.utils.CrashLogHandler;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.Date;
 
 public class MainActivity extends BaseActivity {
@@ -54,23 +52,8 @@ public class MainActivity extends BaseActivity {
                 takeScreenshot();
             }
         });
-
-        findViewById(R.id.event_120).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                try {
-                    Process process = Runtime.getRuntime().exec("input keyevent 120");
-
-                    Log.d("keyevent", " 120");
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-
     }
+
 
     @Override
     protected void onResume() {

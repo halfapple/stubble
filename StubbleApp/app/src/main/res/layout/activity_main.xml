@@ -6,34 +6,29 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:fitsSystemWindows="true"
     tools:context="com.app.stubble.MainActivity">
 
     <Button
         android:id="@+id/start_float_window"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Start Float Window" >
+        android:text="Float Window" >
     </Button>
 
     <Button
         android:id="@+id/test_view_lifecycle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="My View " >
+        android:text="Paint" >
     </Button>
 
     <Button
         android:id="@+id/test_capture"
+        android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="capture" >
-    </Button>
-
-    <Button
-        android:id="@+id/event_120"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="event 120" >
     </Button>
 
 </LinearLayout>

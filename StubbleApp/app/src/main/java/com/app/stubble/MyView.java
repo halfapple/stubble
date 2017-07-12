@@ -57,6 +57,7 @@ public class MyView extends View {
 
     private Context mContext;
     private OnScreenShotListener mOnScreenShotListener;
+    private OnMovedListener mOnMovedListener;
 
     private boolean isInSlide;
     private boolean isInRectangle;
@@ -65,8 +66,16 @@ public class MyView extends View {
         void onScreenShot(float left, float top, float right, float bottom);
     }
 
+    public interface OnMovedListener {
+        void onMovedListener(float left, float top, float right, float bottom);
+    }
+
     public void setOnScreenShotListener(OnScreenShotListener arg) {
         this.mOnScreenShotListener = arg;
+    }
+
+    public void setOnMovedListener(OnMovedListener arg) {
+        this.mOnMovedListener = arg;
     }
 
     public MyView(Context context) {
@@ -217,6 +226,10 @@ public class MyView extends View {
                     }
 
                     update_view_position();
+                }
+
+                if (mOnMovedListener != null) {
+                    mOnMovedListener.onMovedListener(sPRawX, sPRawY, ePRawX, ePRawY);
                 }
                 break;
 
