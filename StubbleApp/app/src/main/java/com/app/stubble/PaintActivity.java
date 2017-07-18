@@ -187,7 +187,11 @@ public class PaintActivity extends BaseActivity {
             marker_self_border(bitmap);
             marker_target_border(bitmap);
 
-            //bitmap = cropBitmap(bitmap);
+            bitmap = Bitmap.createBitmap(bitmap,
+                    (int)(mLeft * xFactor),
+                    (int)(mTop * yFactor),
+                    (int)((mRight - mLeft) * xFactor),
+                    (int)((mBottom - mTop) * yFactor));
 
             save_bitmap(bitmap);
         }
@@ -209,6 +213,7 @@ public class PaintActivity extends BaseActivity {
         mBorderPaint.setStyle(Paint.Style.STROKE);
         Canvas mCanvas = new Canvas(bitmap);
         mCanvas.drawRect(mLeft * xFactor, mTop * yFactor, mRight * xFactor, mBottom * yFactor, mBorderPaint);
+
     }
 
     private void save_bitmap(Bitmap bitmap) {
