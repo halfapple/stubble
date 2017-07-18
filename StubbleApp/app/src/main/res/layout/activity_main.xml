@@ -6,8 +6,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:fitsSystemWindows="true"
     tools:context="com.app.stubble.MainActivity">
+
+    <!--android:fitsSystemWindows="true"-->
 
     <Button
         android:id="@+id/start_float_window"
@@ -20,15 +21,19 @@
         android:id="@+id/test_view_lifecycle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Paint" >
+        android:text="ScreenShot" >
     </Button>
 
     <Button
         android:id="@+id/test_capture"
-        android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="capture" >
+        android:text="capture view">
     </Button>
+
+    <ImageView android:layout_width="100dp"
+               android:id="@+id/main_test_iv"
+               android:layout_height="100dp"/>
+
 
 </LinearLayout>

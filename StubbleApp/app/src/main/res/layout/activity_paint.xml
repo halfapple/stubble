@@ -1,17 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
-    android:id="@+id/activity_main"
+    android:id="@+id/linear_paint"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:fitsSystemWindows="true"
     tools:context="com.app.stubble.PaintActivity">
+
+    <!--android:fitsSystemWindows="true"-->
 
     <FrameLayout android:layout_width="match_parent"
                  android:layout_height="match_parent">
+
+        <TextView android:layout_width="match_parent"
+                  android:gravity="bottom"
+                  android:text="bottom"
+                  android:layout_height="match_parent"/>
 
         <TextView android:layout_width="match_parent"
                   android:id="@+id/location_tv"
@@ -19,8 +25,8 @@
 
         <com.app.stubble.MyView android:layout_width="match_parent"
                                 android:id="@+id/rectangle_view_id"
-                                app:start_point_height="15dp"
-                                app:start_point_width="15dp"
+                                app:start_point_height="25dp"
+                                app:start_point_width="25dp"
                                 app:end_point_height="25dp"
                                 app:end_point_width="25dp"
                                 android:layout_height="match_parent"/>

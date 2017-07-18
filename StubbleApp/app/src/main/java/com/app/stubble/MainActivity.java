@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.app.stubble.utils.CrashLogHandler;
@@ -18,6 +19,7 @@ import java.util.Date;
 public class MainActivity extends BaseActivity {
 
     LinearLayout mLinearLayout;
+    ImageView mTestIv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +29,7 @@ public class MainActivity extends BaseActivity {
         CrashLogHandler.getInstance().init(getApplicationContext());
 
         mLinearLayout = (LinearLayout) findViewById(R.id.main_view);
+        mTestIv = (ImageView) findViewById(R.id.main_test_iv);
 
         Button startFloatWindow = (Button) findViewById(R.id.start_float_window);
         startFloatWindow.setOnClickListener(new View.OnClickListener() {
@@ -49,6 +52,9 @@ public class MainActivity extends BaseActivity {
         findViewById(R.id.test_capture).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                mTestIv.setImageDrawable(getResources().getDrawable(R.mipmap.end_point_default));
+
                 takeScreenshot();
             }
         });
