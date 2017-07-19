@@ -19,7 +19,6 @@
 //        int height1 = img1.getHeight();
 //        int height2 = img2.getHeight();
 //        if ((width1 != width2) || (height1 != height2)) {
-//            System.err.println("Error: Images dimensions mismatch");
 //            System.exit(1);
 //        }
 //

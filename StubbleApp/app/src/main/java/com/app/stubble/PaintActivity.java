@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -23,6 +24,8 @@ import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.app.stubble.utils.ImageDiffUtil2;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -33,8 +36,6 @@ import java.text.SimpleDateFormat;
 
 public class PaintActivity extends BaseActivity {
 
-    private static final String STATE_RESULT_CODE = "result_code";
-    private static final String STATE_RESULT_DATA = "result_data";
     private static final int REQUEST_MEDIA_PROJECTION = 1;
 
     private TextView mTv;
@@ -146,6 +147,7 @@ public class PaintActivity extends BaseActivity {
     private Runnable rr = new Runnable() {
         @Override
         public void run() {
+            //Toast.makeText(getApplicationContext(), "shot...", Toast.LENGTH_SHORT).show();
             dateFormat = new SimpleDateFormat("yyyy_MM_dd_hh_mm_ss");
             pathImage = Environment.getExternalStorageDirectory().getPath()+"/Pictures/";
             strDate = dateFormat.format(new java.util.Date());
@@ -164,7 +166,6 @@ public class PaintActivity extends BaseActivity {
             bitmap.copyPixelsFromBuffer(buffer);
             bitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height);
             image.close();
-
 
             int[] pixel = new int[width];
             bitmap.getPixels(pixel, 0, width, 0, 0, width, 1);
@@ -187,13 +188,36 @@ public class PaintActivity extends BaseActivity {
             marker_self_border(bitmap);
             marker_target_border(bitmap);
 
+            int newLeft = (int)(mLeft * xFactor);
+            int newTop = (int)(mTop * yFactor);
+            int newWidth = (int)((mRight - mLeft) * xFactor);
+            int newHeight = (int)((mBottom - mTop) * yFactor);
+
+//            Bitmap b1 = Bitmap.createBitmap(bitmap,
+//                    newLeft,
+//                    newTop,
+//                    newWidth,
+//                    newHeight / 2);
+//
+//            Bitmap b2 = Bitmap.createBitmap(bitmap,
+//                    newLeft,
+//                    newTop + newHeight / 2,
+//                    newWidth,
+//                    newHeight / 2);
+
             bitmap = Bitmap.createBitmap(bitmap,
-                    (int)(mLeft * xFactor),
-                    (int)(mTop * yFactor),
-                    (int)((mRight - mLeft) * xFactor),
-                    (int)((mBottom - mTop) * yFactor));
+                    newLeft,
+                    newTop,
+                    newWidth,
+                    newHeight);
 
             save_bitmap(bitmap);
+
+            Bitmap b1 = BitmapFactory.decodeResource(getResources(), R.mipmap.moon1);
+            Bitmap b2 = BitmapFactory.decodeResource(getResources(), R.mipmap.moon2);
+            Bitmap diff = ImageDiffUtil2.getDifferenceImage(b1, b2);
+
+            save_bitmap(diff);
         }
     };
 
@@ -281,8 +305,6 @@ public class PaintActivity extends BaseActivity {
                 //DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
                 DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY | DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC,
                 mImageReader.getSurface(), null, null);
-
-        Toast.makeText(getApplicationContext(), "screenshot...", Toast.LENGTH_SHORT).show();
 
         Handler hl = new Handler();
         hl.postDelayed(rr, 1000);

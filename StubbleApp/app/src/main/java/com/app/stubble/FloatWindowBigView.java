@@ -26,8 +26,18 @@ public class FloatWindowBigView extends LinearLayout {
         View view = findViewById(R.id.big_window_layout);
         viewWidth = view.getLayoutParams().width;
         viewHeight = view.getLayoutParams().height;
+        Button diffBtn = (Button) findViewById(R.id.diff_btn);
         Button close = (Button) findViewById(R.id.close);
         Button back = (Button) findViewById(R.id.back);
+
+        diffBtn.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, PaintActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(intent);
+            }
+        });
 
         close.setOnClickListener(new OnClickListener() {
             @Override

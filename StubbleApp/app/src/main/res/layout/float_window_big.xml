@@ -3,9 +3,17 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/big_window_layout"
     android:layout_width="200dip"
-    android:layout_height="100dip"
+    android:layout_height="150dip"
     android:background="#666666"
     android:orientation="vertical">
+
+    <Button
+        android:id="@+id/diff_btn"
+        android:layout_width="100dip"
+        android:layout_height="40dip"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="12dip"
+        android:text="比较"/>
 
     <Button
         android:id="@+id/close"
@@ -20,6 +28,7 @@
         android:layout_width="100dip"
         android:layout_height="40dip"
         android:layout_gravity="center_horizontal"
-        android:text="返回"
-    />
+        android:text="返回"/>
+
+
 </LinearLayout>
