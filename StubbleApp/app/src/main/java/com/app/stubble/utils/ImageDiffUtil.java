@@ -1,11 +1,9 @@
 //package com.app.stubble.utils;
 //
 //
-//import java.awt.image.BufferedImage;
-//import java.io.File;
-//import java.io.IOException;
+//import android.graphics.Bitmap;
 //
-//import javax.imageio.ImageIO;
+//import java.awt.image.BufferedImage;
 //
 ///**
 // * Created by halfapple on 17/7/12.
@@ -51,6 +49,62 @@
 //
 //        // Now return
 //        return outImg;
+//    }
+//
+//    public static Bitmap getDifferenceImage(Bitmap img1, Bitmap img2) {
+//        int width1 = img1.getWidth();
+//        int width2 = img2.getWidth();
+//        int height1 = img1.getHeight();
+//        int height2 = img2.getHeight();
+//        if ((width1 != width2) || (height1 != height2)) {
+//            return img1;
+//        }
+//
+//        Bitmap outImg = Bitmap.createBitmap(width1, height1, Bitmap.Config.ARGB_8888);
+//
+//        for (int i = 0; i < height1; i++) {
+//            for (int j = 0; j < width1; j++) {
+//                int rgb1 = img1.getPixel(j, i);
+//
+//                int rgb2 = img2.getPixel(j, i);
+//
+//                if (rgb1 > rgb2) {
+//                    outImg.setPixel(j, i, rgb1);
+//
+//                } else if (rgb1 == rgb2) {
+//                    //outImg.setPixel(j, i, Color.parseColor("#00000000"));
+//
+//                } else {
+//                    outImg.setPixel(j, i, rgb2);
+//                }
+//            }
+//        }
+//
+//        return outImg;
+//    }
+//
+//    public static int[] calculatePixelsSum(Bitmap bitmap) {
+//        if (bitmap == null) {
+//            return null;
+//        }
+//
+//        int width = bitmap.getWidth();
+//        int height = bitmap.getHeight();
+//
+//        int[] array = new int[height];
+//
+//        for(int i = 0; i < height; i++) {
+//            int sum = 0;
+//            int[] pixels = new int[width];
+//            bitmap.getPixels(pixels, 0, width, 0, 0, width, 1);
+//
+//            for (int pix: pixels) {
+//                sum += pix;
+//            }
+//            array[i] = sum;
+//        }
+//
+//        return array;
 //    }
 //
 //}

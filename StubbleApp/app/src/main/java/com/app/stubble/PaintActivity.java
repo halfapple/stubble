@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -24,6 +23,7 @@ import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.app.stubble.data.InterSectionData;
 import com.app.stubble.utils.ImageDiffUtil2;
 
 import java.io.File;
@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 
 public class PaintActivity extends BaseActivity {
 
@@ -193,31 +194,47 @@ public class PaintActivity extends BaseActivity {
             int newWidth = (int)((mRight - mLeft) * xFactor);
             int newHeight = (int)((mBottom - mTop) * yFactor);
 
-//            Bitmap b1 = Bitmap.createBitmap(bitmap,
+//            bitmap = Bitmap.createBitmap(bitmap,
 //                    newLeft,
 //                    newTop,
 //                    newWidth,
-//                    newHeight / 2);
+//                    newHeight);
+//            save_bitmap(bitmap);
 //
-//            Bitmap b2 = Bitmap.createBitmap(bitmap,
-//                    newLeft,
-//                    newTop + newHeight / 2,
-//                    newWidth,
-//                    newHeight / 2);
-
-            bitmap = Bitmap.createBitmap(bitmap,
+            Bitmap b1 = Bitmap.createBitmap(bitmap,
                     newLeft,
                     newTop,
                     newWidth,
-                    newHeight);
+                    newHeight / 2);
+            save_bitmap(b1);
 
-            save_bitmap(bitmap);
+            Bitmap b2 = Bitmap.createBitmap(bitmap,
+                    newLeft,
+                    newTop + newHeight / 2,
+                    newWidth,
+                    newHeight / 2);
+            save_bitmap(b2);
 
-            Bitmap b1 = BitmapFactory.decodeResource(getResources(), R.mipmap.moon1);
-            Bitmap b2 = BitmapFactory.decodeResource(getResources(), R.mipmap.moon2);
-            Bitmap diff = ImageDiffUtil2.getDifferenceImage(b1, b2);
+//            Bitmap b1 = BitmapFactory.decodeResource(getResources(), R.mipmap.moon1);
+//            Bitmap b2 = BitmapFactory.decodeResource(getResources(), R.mipmap.moon2);
 
-            save_bitmap(diff);
+            int[] red1 = new int[b1.getHeight()];
+            int[] green1 = new int[b1.getHeight()];
+            int[] blue1 = new int[b1.getHeight()];
+            int[] red2 = new int[b2.getHeight()];
+            int[] green2 = new int[b2.getHeight()];
+            int[] blue2 = new int[b2.getHeight()];
+
+            ImageDiffUtil2.calculateRGBAverPerRow(b1, red1, green1, blue1);
+            ImageDiffUtil2.calculateRGBAverPerRow(b2, red2, green2, blue2);
+
+            int[][] twoDimen = ImageDiffUtil2.initTwoDimen(red1, green1, blue1, red2, green2, blue2);
+
+            ArrayList<InterSectionData> arrayList = ImageDiffUtil2.findSmallestRate(twoDimen);
+            if (arrayList != null && arrayList.size() > 0) {
+                InterSectionData is = arrayList.get(0);
+
+            }
         }
     };
 
