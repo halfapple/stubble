@@ -167,7 +167,7 @@ public class MyView extends View {
                 ePRawX = (1 + borderFactor) / 2 * getWidth();
                 ePRawY = (1 + borderFactor) / 2 * getHeight();
 
-                update_view_position();
+                update_view_position(true);
             }
         });
     }
@@ -206,7 +206,7 @@ public class MyView extends View {
                     if (ePRawY > mScreenH) {
                         ePRawY = mScreenH;
                     }
-                    update_view_position();
+                    update_view_position(true);
 
                 } else if (isInRectangle) {
                     //边界处理
@@ -225,7 +225,7 @@ public class MyView extends View {
                         ePRawY = sPRawY + h;
                     }
 
-                    update_view_position();
+                    update_view_position(true);
                 }
 
                 if (mOnMovedListener != null) {
@@ -249,26 +249,36 @@ public class MyView extends View {
         return true;
     }
 
-    private void update_view_position() {
+    public void showBorder() {
+        update_view_position(true);
+    }
+
+    public void hideBorder() {
+        update_view_position(false);
+    }
+
+    private void update_view_position(boolean drawBorder) {
 
         mCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
 
-        mBorderPaint.setStyle(Paint.Style.STROKE);
-        mCanvas.drawRect(sPRawX, sPRawY, ePRawX, ePRawY, mBorderPaint);
-        mCanvas.drawLine(sPRawX, (sPRawY + ePRawY) / 2,
-                ePRawX, (sPRawY + ePRawY) / 2, mBorderPaint);
+        if (drawBorder) {
+            mBorderPaint.setStyle(Paint.Style.STROKE);
+            mCanvas.drawRect(sPRawX, sPRawY, ePRawX, ePRawY, mBorderPaint);
+            mCanvas.drawLine(sPRawX, (sPRawY + ePRawY) / 2,
+                    ePRawX, (sPRawY + ePRawY) / 2, mBorderPaint);
 
-        Rect rectStart = new Rect((int)(sPRawX - sPWidth / 2),
-                (int)(sPRawY - sPHeight / 2),
-                (int)(sPRawX + sPWidth / 2),
-                (int)(sPRawY + sPHeight / 2));
-        mCanvas.drawBitmap(sPBitmap, null, rectStart, null);
+            Rect rectStart = new Rect((int)(sPRawX - sPWidth / 2),
+                    (int)(sPRawY - sPHeight / 2),
+                    (int)(sPRawX + sPWidth / 2),
+                    (int)(sPRawY + sPHeight / 2));
+            mCanvas.drawBitmap(sPBitmap, null, rectStart, null);
 
-        Rect rectEnd = new Rect((int)(ePRawX - ePWidth / 2),
-                (int)(ePRawY - ePHeight / 2),
-                (int)(ePRawX + ePWidth / 2),
-                (int)(ePRawY + ePHeight / 2));
-        mCanvas.drawBitmap(ePBitmap, null, rectEnd, null);
+            Rect rectEnd = new Rect((int)(ePRawX - ePWidth / 2),
+                    (int)(ePRawY - ePHeight / 2),
+                    (int)(ePRawX + ePWidth / 2),
+                    (int)(ePRawY + ePHeight / 2));
+            mCanvas.drawBitmap(ePBitmap, null, rectEnd, null);
+        }
 
         postInvalidate();
     }

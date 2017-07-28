@@ -22,16 +22,14 @@
         <LinearLayout android:layout_width="match_parent"
                       android:orientation="vertical"
                       android:layout_height="match_parent">
-            <ImageView android:layout_width="wrap_content"
+            <ImageView android:layout_width="192dp"
                        android:scaleType="centerInside"
-                       android:layout_height="0dp"
-                       android:src="@mipmap/moon1"
-                       android:layout_weight="1"/>
-            <ImageView android:layout_width="wrap_content"
+                       android:layout_height="128dp"
+                       android:src="@mipmap/moon1"/>
+            <ImageView android:layout_width="192dp"
                        android:scaleType="centerInside"
-                       android:layout_height="0dp"
-                       android:src="@mipmap/moon2"
-                       android:layout_weight="1"/>
+                       android:layout_height="128dp"
+                       android:src="@mipmap/moon2"/>
         </LinearLayout>
 
         <com.app.stubble.MyView android:layout_width="match_parent"

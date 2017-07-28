@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -24,7 +25,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.app.stubble.data.InterSectionData;
-import com.app.stubble.utils.ImageDiffUtil2;
+import com.app.stubble.data.StartEndNum;
+import com.app.stubble.utils.ImageDiffUtil3;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -34,6 +36,8 @@ import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+
+import static com.app.stubble.utils.ImageDiffUtil3.step_first_check_even_number;
 
 public class PaintActivity extends BaseActivity {
 
@@ -98,10 +102,16 @@ public class PaintActivity extends BaseActivity {
     }
 
     private void update_tv(float left, float top, float right, float bottom) {
-        mLeft = (int) (left);
-        mTop = (int) (top);
-        mRight = (int) (right);
-        mBottom = (int) (bottom);
+        mLeft = step_first_check_even_number(left, true);
+        mTop = step_first_check_even_number(top, true);
+        mRight = step_first_check_even_number(right, false);
+        mBottom = step_first_check_even_number(bottom, false);
+
+        //todo fake
+        mLeft = 17;
+        mTop = 6;
+        mRight = 336;
+        mBottom = 821;
 
         sb.delete(0, sb.length());
         sb.append("left=").append(mLeft).append("\n")
@@ -148,11 +158,10 @@ public class PaintActivity extends BaseActivity {
     private Runnable rr = new Runnable() {
         @Override
         public void run() {
-            //Toast.makeText(getApplicationContext(), "shot...", Toast.LENGTH_SHORT).show();
+
             dateFormat = new SimpleDateFormat("yyyy_MM_dd_hh_mm_ss");
             pathImage = Environment.getExternalStorageDirectory().getPath()+"/Pictures/";
             strDate = dateFormat.format(new java.util.Date());
-            nameImage = pathImage + strDate + ".png";
 
             Image image = mImageReader.acquireLatestImage();
             int width = image.getWidth(); //1440
@@ -186,61 +195,146 @@ public class PaintActivity extends BaseActivity {
             }
             bitmap = Bitmap.createBitmap(bitmap, leftPadding, 0, rightPadding-leftPadding, height); //delete empty pixel
 
-            marker_self_border(bitmap);
-            marker_target_border(bitmap);
+            //marker_self_border(bitmap);
+            //marker_target_border(bitmap);
+
+            save_bitmap(bitmap, "b1_b2_src");
 
             int newLeft = (int)(mLeft * xFactor);
             int newTop = (int)(mTop * yFactor);
             int newWidth = (int)((mRight - mLeft) * xFactor);
             int newHeight = (int)((mBottom - mTop) * yFactor);
 
-//            bitmap = Bitmap.createBitmap(bitmap,
-//                    newLeft,
-//                    newTop,
-//                    newWidth,
-//                    newHeight);
-//            save_bitmap(bitmap);
-//
-            Bitmap b1 = Bitmap.createBitmap(bitmap,
+            Bitmap b1_src = Bitmap.createBitmap(bitmap,
                     newLeft,
                     newTop,
                     newWidth,
                     newHeight / 2);
-            save_bitmap(b1);
-
-            Bitmap b2 = Bitmap.createBitmap(bitmap,
+            save_bitmap(b1_src, "b1_src");
+            Bitmap b2_src = Bitmap.createBitmap(bitmap,
                     newLeft,
                     newTop + newHeight / 2,
                     newWidth,
                     newHeight / 2);
-            save_bitmap(b2);
+            save_bitmap(b2_src, "b2_src");
 
-//            Bitmap b1 = BitmapFactory.decodeResource(getResources(), R.mipmap.moon1);
-//            Bitmap b2 = BitmapFactory.decodeResource(getResources(), R.mipmap.moon2);
+            Bitmap b1_copy = Bitmap.createBitmap(b1_src, 0, 0, b1_src.getWidth(), b1_src.getHeight());
+            Bitmap b2_copy = Bitmap.createBitmap(b2_src, 0, 0, b2_src.getWidth(), b2_src.getHeight());
 
-            int[] red1 = new int[b1.getHeight()];
-            int[] green1 = new int[b1.getHeight()];
-            int[] blue1 = new int[b1.getHeight()];
-            int[] red2 = new int[b2.getHeight()];
-            int[] green2 = new int[b2.getHeight()];
-            int[] blue2 = new int[b2.getHeight()];
+            StartEndNum startEndNum1 = new StartEndNum(0, b1_src.getHeight(), 1);
+            StartEndNum startEndNum2 = new StartEndNum(0, b2_src.getHeight(), 1);
 
-            ImageDiffUtil2.calculateRGBAverPerRow(b1, red1, green1, blue1);
-            ImageDiffUtil2.calculateRGBAverPerRow(b2, red2, green2, blue2);
+            int[] xy = new int[2];
+            while (xy[0] != 1 && xy[1] != 1) {
+                Bitmap scale_b1 = ImageDiffUtil3.step_second_scale_bitmap(b1_copy, xy);
+                Bitmap scale_b2 = ImageDiffUtil3.step_second_scale_bitmap(b2_copy, xy);
 
-            int[][] twoDimen = ImageDiffUtil2.initTwoDimen(red1, green1, blue1, red2, green2, blue2);
+                double[][] grayPixels1 = ImageDiffUtil3.step_third_1_getGrayPixels(scale_b1);
+                double avg = ImageDiffUtil3.step_third_2_getGrayAvg(grayPixels1);
+                byte[] bytes1 = ImageDiffUtil3.step_third_3_getFinger(grayPixels1, avg); //finger1
 
-            ArrayList<InterSectionData> arrayList = ImageDiffUtil2.findSmallestRate(twoDimen);
-            if (arrayList != null && arrayList.size() > 0) {
-                InterSectionData is = arrayList.get(0);
+                double[][] grayPixels2 = ImageDiffUtil3.step_third_1_getGrayPixels(scale_b2);
+                byte[] bytes2 = ImageDiffUtil3.step_third_3_getFinger(grayPixels2, avg); //finger2
 
+                int[][] twoDimen = ImageDiffUtil3.step_fouth_get_diff_twodimen(bytes1, bytes2);
+
+                ArrayList<InterSectionData> arrayList = ImageDiffUtil3.step_fivth_getSimilarList(twoDimen);
+
+                if (arrayList != null && arrayList.size() > 0) {
+                    InterSectionData last = arrayList.get(arrayList.size() - 1);
+
+                    int unit1 = b1_copy.getHeight() / scale_b1.getHeight();
+                    int scale1_start = last.iBegin / scale_b1.getWidth();
+                    startEndNum1.setStart(startEndNum1.getStart() + unit1 * scale1_start);
+                    startEndNum1.setUnit(unit1);
+                    if (startEndNum1.getEnd() == b1_src.getHeight()) {
+                        int scale1_end = last.iEnd / scale_b1.getWidth();
+                        startEndNum1.setEnd(unit1 * scale1_end);
+                    }
+
+                    int unit2 = b2_copy.getHeight() / scale_b2.getHeight();
+                    int scale2_start = last.jBegin / scale_b2.getWidth();
+                    startEndNum2.setStart(startEndNum2.getStart() + (unit2 * scale2_start));
+                    startEndNum2.setUnit(unit2);
+                    if (startEndNum2.getEnd() == b2_src.getHeight()) {
+                        int scale2_end = last.jEnd / scale_b2.getWidth();
+                        startEndNum2.setEnd(unit2 * scale2_end);
+                    }
+
+                    if (scale1_start == 0 && scale2_start == 0) {
+                        // 同时等于0时，找到类似起点；
+                        // 缩小图片（只取一个像素对应的unit的高度），继续；
+                        if (startEndNum1.getStart() >= (int)startEndNum1.getUnit()) {
+                            startEndNum1.setStart(startEndNum1.getStart() - startEndNum1.getUnit());
+                        } else {
+                            startEndNum1.setStart(0);
+                        }
+                        b1_copy = Bitmap.createBitmap(b1_src,
+                                0, startEndNum1.getStart(),
+                                b1_src.getWidth(), startEndNum1.getUnit());
+
+                        if (startEndNum2.getStart() >= startEndNum2.getUnit()) {
+                            startEndNum2.setStart(startEndNum2.getStart() - startEndNum2.getUnit());
+                        } else {
+                            startEndNum2.setStart(0);
+                        }
+                        b2_copy = Bitmap.createBitmap(b2_src,
+                                0, startEndNum2.getStart(),
+                                b2_src.getWidth(), startEndNum2.getUnit());
+
+                        save_bitmap(b1_copy, "b1_temp");
+                        save_bitmap(b2_copy, "b2_temp");
+
+                        //开始精细查找
+                        int[] shifts = new int[3];
+                        ImageDiffUtil3.precise_similarest_row(b1_copy, b2_copy, shifts);
+
+                        if (shifts[0] > shifts[1]) {
+                            startEndNum1.setStart(startEndNum1.getStart() + shifts[0] - shifts[1]);
+                        } else if (shifts[0] < shifts[1]) {
+                            startEndNum2.setStart(startEndNum2.getStart() + shifts[1] - shifts[0]);
+                        }
+//                        startEndNum1.setStart(startEndNum1.getStart() + shifts[0]);
+//                        startEndNum2.setStart(startEndNum2.getStart() + shifts[1]);
+                        break;
+                    }
+
+                    int splited_height1 = startEndNum1.getEnd() - startEndNum1.getStart();
+                    int splited_height2 = startEndNum2.getEnd() - startEndNum2.getStart();
+                    int splited_height = splited_height1 > splited_height2 ? splited_height2 : splited_height1;
+
+                    b1_copy = Bitmap.createBitmap(b1_src,
+                            0, startEndNum1.getStart(),
+                            b1_src.getWidth(), splited_height);
+                    b2_copy = Bitmap.createBitmap(b2_src,
+                            0, startEndNum2.getStart(),
+                            b1_src.getWidth(), splited_height);
+                }
             }
+
+            int splited_height1 = startEndNum1.getEnd() - startEndNum1.getStart();
+            int splited_height2 = startEndNum2.getEnd() - startEndNum2.getStart();
+            int splited_height = splited_height1 > splited_height2 ? splited_height2 : splited_height1;
+
+            b1_copy = Bitmap.createBitmap(b1_src,
+                    0, startEndNum1.getStart(),
+                    b1_src.getWidth(), splited_height);
+            b2_copy = Bitmap.createBitmap(b2_src,
+                    0, startEndNum2.getStart(),
+                    b2_src.getWidth(), splited_height);
+            save_bitmap(b1_copy, "b1_final");
+            save_bitmap(b2_copy, "b2_final");
+
+            Bitmap resultBit = ImageDiffUtil3.last_compare_images(b1_copy, b2_copy);
+            save_bitmap(resultBit, "result");
+
+            mMyView.showBorder();
         }
     };
 
     private void marker_self_border(Bitmap bitmap) {
         Paint mBorderPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mBorderPaint.setStrokeWidth(20);
+        mBorderPaint.setStrokeWidth(2);
         mBorderPaint.setColor(Color.parseColor("#303F9F"));//blue
         mBorderPaint.setStyle(Paint.Style.STROKE);
         Canvas mCanvas = new Canvas(bitmap);
@@ -257,13 +351,16 @@ public class PaintActivity extends BaseActivity {
 
     }
 
-    private void save_bitmap(Bitmap bitmap) {
+    private void save_bitmap(Bitmap bitmap, String name) {
         if(bitmap != null) {
             try {
                 File pa = new File(pathImage);
                 if (!pa.exists()) {
                     pa.mkdirs();
                 }
+
+                nameImage = pathImage + name + ".png";
+
                 File fileImage = new File(nameImage);
                 if(!fileImage.exists()) {
                     fileImage.createNewFile();
@@ -286,17 +383,6 @@ public class PaintActivity extends BaseActivity {
         }
     }
 
-    private Bitmap cropBitmap(Bitmap bitmap) {
-        if(bitmap != null) {
-            int cut_width = Math.abs(mRight - mLeft);
-            int cut_height = Math.abs(mBottom - mTop);
-            if (cut_width > 0 && cut_height > 0) {
-                return Bitmap.createBitmap(bitmap, mLeft, mTop, cut_width, cut_height);
-            }
-        }
-        return bitmap;
-    }
-
     private void startScreenCapture() {
         if (mMediaProjection != null) {
             setUpVirtualDisplay();
@@ -317,6 +403,9 @@ public class PaintActivity extends BaseActivity {
     }
 
     private void setUpVirtualDisplay() {
+
+        mMyView.hideBorder();
+
         mVirtualDisplay = mMediaProjection.createVirtualDisplay("screenshot",
                 windowWidth, windowHeight, mScreenDensity,
                 //DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
@@ -325,7 +414,28 @@ public class PaintActivity extends BaseActivity {
 
         Handler hl = new Handler();
         hl.postDelayed(rr, 1000);
+        //hl.postDelayed(rr2, 1000);
     }
+
+    private Runnable rr2 = new Runnable() {
+        @Override
+        public void run() {
+            Bitmap b1 = BitmapFactory.decodeResource(getResources(), R.mipmap.moon_test_1);
+            Bitmap b2 = BitmapFactory.decodeResource(getResources(), R.mipmap.moon_test_2);
+
+//            int newShift = 2;
+//            int hh = b1.getHeight() - newShift;
+//            b1 = Bitmap.createBitmap(b1, 0, 2, b1.getWidth(), hh);
+//            b2 = Bitmap.createBitmap(b2, 0, 0, b2.getWidth(), hh);
+
+            Bitmap resultBit = ImageDiffUtil3.last_compare_images(b1, b2);
+
+            pathImage = Environment.getExternalStorageDirectory().getPath()+"/Pictures/";
+            save_bitmap(resultBit, "test_result");
+
+            mMyView.showBorder();
+        }
+    };
 
     private void tearDownMediaProjection() {
         if (mMediaProjection != null) {
@@ -365,4 +475,5 @@ public class PaintActivity extends BaseActivity {
         }
         return 0;
     }
+
 }
