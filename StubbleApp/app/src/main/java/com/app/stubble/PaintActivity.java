@@ -5,9 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.media.Image;
@@ -107,11 +104,11 @@ public class PaintActivity extends BaseActivity {
         mRight = step_first_check_even_number(right, false);
         mBottom = step_first_check_even_number(bottom, false);
 
-        //todo fake
-        mLeft = 17;
-        mTop = 6;
-        mRight = 336;
-        mBottom = 821;
+//        //todo fake
+//        mLeft = 17;
+//        mTop = 6;
+//        mRight = 336;
+//        mBottom = 821;
 
         sb.delete(0, sb.length());
         sb.append("left=").append(mLeft).append("\n")
@@ -195,9 +192,6 @@ public class PaintActivity extends BaseActivity {
             }
             bitmap = Bitmap.createBitmap(bitmap, leftPadding, 0, rightPadding-leftPadding, height); //delete empty pixel
 
-            //marker_self_border(bitmap);
-            //marker_target_border(bitmap);
-
             save_bitmap(bitmap, "b1_b2_src");
 
             int newLeft = (int)(mLeft * xFactor);
@@ -225,90 +219,65 @@ public class PaintActivity extends BaseActivity {
             StartEndNum startEndNum2 = new StartEndNum(0, b2_src.getHeight(), 1);
 
             int[] xy = new int[2];
-            while (xy[0] != 1 && xy[1] != 1) {
-                Bitmap scale_b1 = ImageDiffUtil3.step_second_scale_bitmap(b1_copy, xy);
-                Bitmap scale_b2 = ImageDiffUtil3.step_second_scale_bitmap(b2_copy, xy);
+            Bitmap scale_b1 = ImageDiffUtil3.step_second_scale_bitmap(b1_copy, xy);
+            Bitmap scale_b2 = ImageDiffUtil3.step_second_scale_bitmap(b2_copy, xy);
 
-                double[][] grayPixels1 = ImageDiffUtil3.step_third_1_getGrayPixels(scale_b1);
-                double avg = ImageDiffUtil3.step_third_2_getGrayAvg(grayPixels1);
-                byte[] bytes1 = ImageDiffUtil3.step_third_3_getFinger(grayPixels1, avg); //finger1
+            double[][] grayPixels1 = ImageDiffUtil3.step_third_1_getGrayPixels(scale_b1);
+            double avg = ImageDiffUtil3.step_third_2_getGrayAvg(grayPixels1);
+            byte[] bytes1 = ImageDiffUtil3.step_third_3_getFinger(grayPixels1, avg); //finger1
 
-                double[][] grayPixels2 = ImageDiffUtil3.step_third_1_getGrayPixels(scale_b2);
-                byte[] bytes2 = ImageDiffUtil3.step_third_3_getFinger(grayPixels2, avg); //finger2
+            double[][] grayPixels2 = ImageDiffUtil3.step_third_1_getGrayPixels(scale_b2);
+            byte[] bytes2 = ImageDiffUtil3.step_third_3_getFinger(grayPixels2, avg); //finger2
 
-                int[][] twoDimen = ImageDiffUtil3.step_fouth_get_diff_twodimen(bytes1, bytes2);
+            int[][] twoDimen = ImageDiffUtil3.step_fouth_get_diff_twodimen(bytes1, bytes2);
 
-                ArrayList<InterSectionData> arrayList = ImageDiffUtil3.step_fivth_getSimilarList(twoDimen);
+            ArrayList<InterSectionData> arrayList = ImageDiffUtil3.step_fivth_getSimilarList(twoDimen);
 
-                if (arrayList != null && arrayList.size() > 0) {
-                    InterSectionData last = arrayList.get(arrayList.size() - 1);
+            if (arrayList != null && arrayList.size() > 0) {
+                InterSectionData last = arrayList.get(arrayList.size() - 1);
 
-                    int unit1 = b1_copy.getHeight() / scale_b1.getHeight();
-                    int scale1_start = last.iBegin / scale_b1.getWidth();
-                    startEndNum1.setStart(startEndNum1.getStart() + unit1 * scale1_start);
-                    startEndNum1.setUnit(unit1);
-                    if (startEndNum1.getEnd() == b1_src.getHeight()) {
-                        int scale1_end = last.iEnd / scale_b1.getWidth();
-                        startEndNum1.setEnd(unit1 * scale1_end);
-                    }
+                int unit1 = b1_copy.getHeight() / scale_b1.getHeight();
+                int scale1_start = (last.iBegin + scale_b1.getWidth() / 2) / scale_b1.getWidth();
+                startEndNum1.setStart(startEndNum1.getStart() + unit1 * scale1_start);
+                startEndNum1.setUnit(unit1);
+                if (startEndNum1.getEnd() == b1_src.getHeight()) {
+                    int scale1_end = last.iEnd / scale_b1.getWidth();
+                    startEndNum1.setEnd(unit1 * scale1_end);
+                }
 
-                    int unit2 = b2_copy.getHeight() / scale_b2.getHeight();
-                    int scale2_start = last.jBegin / scale_b2.getWidth();
-                    startEndNum2.setStart(startEndNum2.getStart() + (unit2 * scale2_start));
-                    startEndNum2.setUnit(unit2);
-                    if (startEndNum2.getEnd() == b2_src.getHeight()) {
-                        int scale2_end = last.jEnd / scale_b2.getWidth();
-                        startEndNum2.setEnd(unit2 * scale2_end);
-                    }
+                int unit2 = b2_copy.getHeight() / scale_b2.getHeight();
+                int scale2_start = (last.jBegin + scale_b2.getWidth() / 2 ) / scale_b2.getWidth();
+                startEndNum2.setStart(startEndNum2.getStart() + (unit2 * scale2_start));
+                startEndNum2.setUnit(unit2);
+                if (startEndNum2.getEnd() == b2_src.getHeight()) {
+                    int scale2_end = last.jEnd / scale_b2.getWidth();
+                    startEndNum2.setEnd(unit2 * scale2_end);
+                }
 
-                    if (scale1_start == 0 && scale2_start == 0) {
-                        // 同时等于0时，找到类似起点；
-                        // 缩小图片（只取一个像素对应的unit的高度），继续；
-                        if (startEndNum1.getStart() >= (int)startEndNum1.getUnit()) {
-                            startEndNum1.setStart(startEndNum1.getStart() - startEndNum1.getUnit());
-                        } else {
-                            startEndNum1.setStart(0);
-                        }
-                        b1_copy = Bitmap.createBitmap(b1_src,
-                                0, startEndNum1.getStart(),
-                                b1_src.getWidth(), startEndNum1.getUnit());
+                startEndNum1.setStart(0);
 
-                        if (startEndNum2.getStart() >= startEndNum2.getUnit()) {
-                            startEndNum2.setStart(startEndNum2.getStart() - startEndNum2.getUnit());
-                        } else {
-                            startEndNum2.setStart(0);
-                        }
-                        b2_copy = Bitmap.createBitmap(b2_src,
-                                0, startEndNum2.getStart(),
-                                b2_src.getWidth(), startEndNum2.getUnit());
+                int hh = startEndNum1.getStart() > startEndNum2.getStart() ?
+                        startEndNum1.getStart() : startEndNum2.getStart();
+                b1_copy = Bitmap.createBitmap(b1_src,
+                        0, 0,
+                        b1_src.getWidth(), hh);
 
-                        save_bitmap(b1_copy, "b1_temp");
-                        save_bitmap(b2_copy, "b2_temp");
+                startEndNum2.setStart(0);
+                b2_copy = Bitmap.createBitmap(b2_src,
+                        0, 0,
+                        b2_src.getWidth(), hh);
 
-                        //开始精细查找
-                        int[] shifts = new int[3];
-                        ImageDiffUtil3.precise_similarest_row(b1_copy, b2_copy, shifts);
+                save_bitmap(b1_copy, "b1_temp");
+                save_bitmap(b2_copy, "b2_temp");
 
-                        if (shifts[0] > shifts[1]) {
-                            startEndNum1.setStart(startEndNum1.getStart() + shifts[0] - shifts[1]);
-                        } else if (shifts[0] < shifts[1]) {
-                            startEndNum2.setStart(startEndNum2.getStart() + shifts[1] - shifts[0]);
-                        }
-//                        startEndNum1.setStart(startEndNum1.getStart() + shifts[0]);
-//                        startEndNum2.setStart(startEndNum2.getStart() + shifts[1]);
-                        break;
-                    }
+                //开始精细查找
+                int[] shifts = new int[3];
+                ImageDiffUtil3.precise_similarest_row(b1_copy, b2_copy, shifts);
 
-                    int splited_height1 = startEndNum1.getEnd() - startEndNum1.getStart();
-                    int splited_height2 = startEndNum2.getEnd() - startEndNum2.getStart();
-                    int splited_height = splited_height1 > splited_height2 ? splited_height2 : splited_height1;
-
-                    b1_copy = Bitmap.createBitmap(b1_src,
-                            0, startEndNum1.getStart(),
-                            b1_src.getWidth(), splited_height);
-                    b2_copy = Bitmap.createBitmap(b2_src,
-                            0, startEndNum2.getStart(),
-                            b1_src.getWidth(), splited_height);
+                if (shifts[0] > shifts[1]) {
+                    startEndNum1.setStart(startEndNum1.getStart() + shifts[0] - shifts[1]);
+                } else if (shifts[0] < shifts[1]) {
+                    startEndNum2.setStart(startEndNum2.getStart() + shifts[1] - shifts[0]);
                 }
             }
 
@@ -331,25 +300,6 @@ public class PaintActivity extends BaseActivity {
             mMyView.showBorder();
         }
     };
-
-    private void marker_self_border(Bitmap bitmap) {
-        Paint mBorderPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mBorderPaint.setStrokeWidth(2);
-        mBorderPaint.setColor(Color.parseColor("#303F9F"));//blue
-        mBorderPaint.setStyle(Paint.Style.STROKE);
-        Canvas mCanvas = new Canvas(bitmap);
-        mCanvas.drawRect(0, 0, bitmap.getWidth(), bitmap.getHeight(), mBorderPaint);
-    }
-
-    private void marker_target_border(Bitmap bitmap) {
-        Paint mBorderPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mBorderPaint.setStrokeWidth(2);
-        mBorderPaint.setColor(Color.parseColor("#303F9F"));//blue
-        mBorderPaint.setStyle(Paint.Style.STROKE);
-        Canvas mCanvas = new Canvas(bitmap);
-        mCanvas.drawRect(mLeft * xFactor, mTop * yFactor, mRight * xFactor, mBottom * yFactor, mBorderPaint);
-
-    }
 
     private void save_bitmap(Bitmap bitmap, String name) {
         if(bitmap != null) {
