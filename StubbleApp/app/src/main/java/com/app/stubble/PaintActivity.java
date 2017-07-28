@@ -258,6 +258,9 @@ public class PaintActivity extends BaseActivity {
 
                 int hh = startEndNum1.getStart() > startEndNum2.getStart() ?
                         startEndNum1.getStart() : startEndNum2.getStart();
+                if (hh == 0) {
+                    hh = startEndNum1.getUnit();
+                }
                 b1_copy = Bitmap.createBitmap(b1_src,
                         0, 0,
                         b1_src.getWidth(), hh);

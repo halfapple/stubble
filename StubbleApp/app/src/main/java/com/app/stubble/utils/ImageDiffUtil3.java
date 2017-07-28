@@ -135,7 +135,7 @@ public class ImageDiffUtil3 {
     }
 
     //(alpha << 24) | (red << 16) | (green << 8) | blue;
-    private static int computePixelDiff(int pixel1, int pixel2) {
+    private static int computePixelDiff(int pixel1, int pixel2, int[] rgbDiff) {
         //int a1 = (pixel1 >> 24) & 0xFF;
         int r1 = (pixel1 >> 16) & 0xFF;
         int g1 = (pixel1 >> 8) & 0xFF;
@@ -146,7 +146,15 @@ public class ImageDiffUtil3 {
         int g2 = (pixel2 >> 8) & 0xFF;
         int b2 = (pixel2) & 255;
 
-        return (0xFF << 24) | (Math.abs(r1 - r2) << 16) | (Math.abs(g1 - g2) << 8) | Math.abs(b1 - b2);
+        if (rgbDiff == null || rgbDiff.length != 3) {
+            throw new IllegalArgumentException();
+        }
+
+        rgbDiff[0] = Math.abs(r1 - r2);
+        rgbDiff[1] = Math.abs(g1 - g2);
+        rgbDiff[2] = Math.abs(b1 - b2);
+
+        return (0xFF << 24) | (rgbDiff[0] << 16) | (rgbDiff[1] << 8) | rgbDiff[2];
     }
 
     /*
@@ -253,6 +261,7 @@ public class ImageDiffUtil3 {
 
         Bitmap outImg = Bitmap.createBitmap(srcBitmap.getWidth(), 2 * srcBitmap.getHeight(), Bitmap.Config.ARGB_8888);
 
+        int[] rgbDiff = new int[3];
         for (int i = 0; i < srcBitmap.getHeight(); i++) {
             for (int j = 0; j < srcBitmap.getWidth(); j++) {
                 int pixelA = srcBitmap.getPixel(j, i);
@@ -267,9 +276,9 @@ public class ImageDiffUtil3 {
 //                    outImg.setPixel(j, srcBitmap.getHeight() + i, pixelB);
 //                }
 
-
+                int diff = computePixelDiff(pixelA, pixelB, rgbDiff);
                 outImg.setPixel(j, i, pixelA);
-                outImg.setPixel(j, srcBitmap.getHeight() + i, computePixelDiff(pixelA, pixelB));
+                outImg.setPixel(j, srcBitmap.getHeight() + i, diff);
 
 
 //                int cmp = computeRGBDiff(pixelA, pixelB);
